@@ -6,12 +6,15 @@ class ListsController < ApplicationController
 
   def create
     # １.&2. データを受け取り新規登録するためのインスタンス作成
-    list = List.new(list_params)
+    @list = List.new(list_params)
     # 3. データをデータベースに保存するためのsaveメソッド実行
-    list.save
-    # redirect_to '/top'を削除して、下記コードに変更
-    # 詳細画面へリダイレクト
-    redirect_to list_path(list.id)
+    if @list.save
+      # 対象カラムにデータ入力されていれば、次のページにリダイレクト
+      redirect_to list_path(@list.id)
+    # 対象カラムにデータ入力されていなければ、新規投稿ページを再表示
+    else
+      render :new
+    end
   end
 
   def index
@@ -28,18 +31,27 @@ class ListsController < ApplicationController
   end
 
   def update
-    # ID情報を取り出す
+    # ID情報を取得
     list = List.find(params[:id])
     # データベース内のデータを更新する
     list.update(list_params)
-    # showアクションへリダイレクトする
+    #   詳細画面（showアクション）へリダイレクト
     redirect_to list_path(list.id)
+  end
+
+  def destroy
+    # ID情報を取得
+    list = List.find(params[:id])
+    # データを削除
+    list.destroy
+    # 投稿一覧画面（indexアクション）へリダイレクト
+    redirect_to '/lists'
   end
 
   private
   # ストロングパラメータ
   def list_params
-    params.require(:list).permit(:title, :body)
+    params.require(:list).permit(:title, :body, :image)
   end
 
 end
